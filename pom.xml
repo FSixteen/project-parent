@@ -8,7 +8,7 @@
   <packaging>pom</packaging>
 
   <name>project-parent</name>
-  <url>http://maven.apache.org</url>
+  <url>http://www.xyshzh.com</url>
 
   <modules>
     <module>janusgraph</module>
