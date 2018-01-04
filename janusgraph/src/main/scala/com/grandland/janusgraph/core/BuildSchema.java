@@ -67,7 +67,7 @@ public final class BuildSchema {
       }
     }
 
-    // /*
+    /*
     System.out.println("---开始处理IndexEnum注解---");
     for (Field field : fields) {
       String fieldName = field.getName();
