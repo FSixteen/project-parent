@@ -32,6 +32,7 @@
     <org.scalatest.version>2.2.4</org.scalatest.version>
     <com.google.protobuf.version>3.3.1</com.google.protobuf.version>
   </properties>
+  
   <dependencyManagement>
     <dependencies>
       <!-- junit依赖组件信息 ↓ -->
