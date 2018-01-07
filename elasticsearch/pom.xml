@@ -7,7 +7,7 @@
   <groupId>com.xyshzh</groupId>
   <artifactId>elasticsearch</artifactId>
   <version>0.0.1</version>
-  
+
   <name>elasticsearch</name>
   <url>http://www.xyshzh.com</url>
 
@@ -28,6 +28,14 @@
       <scope>test</scope>
     </dependency>
     <!-- junit依赖组件信息↑ -->
+
+    <!-- Elasticsearch依赖组件信息 ↓ -->
+    <dependency>
+      <groupId>org.elasticsearch.client</groupId>
+      <artifactId>transport</artifactId>
+      <version>6.1.1</version>
+    </dependency>
+    <!-- Elasticsearch依赖组件信息↑ -->
   </dependencies>
 
   <build>
