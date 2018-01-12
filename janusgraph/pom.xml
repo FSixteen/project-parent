@@ -36,6 +36,10 @@
       <version>6.1.1</version>
     </dependency>
     <!-- Elasticsearch依赖组件信息↑ -->
+
+    <!-- JanusGraph依赖组件信息 ↓ -->
+
+    <!-- JanusGraph依赖组件信息↑ -->
   </dependencies>
 
   <build>
