@@ -1,6 +1,7 @@
 
 *.class
 *.classpath
+*.cache-main
 *.project
 *.prefs
 *.log
