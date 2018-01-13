@@ -16,10 +16,22 @@ public class SchemaContentForES {
   @IndexEnum(name = "name", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
       "name" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
   private String name;
+  
+  @PropertyKeyEnum
+  @IndexEnum(name = "region", index = { Index.Vertex }, mapping = Mapping.NULL, indexList = {
+      "region" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private Long region;
+  
   @PropertyKeyEnum
   @IndexEnum(name = "uid", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
       "uid" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
   private String uid;
+  
+  @PropertyKeyEnum
+  @IndexEnum(name = "uid_short", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
+      "uid_short" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String uid_short;
+  
   @PropertyKeyEnum
   @IndexEnum(name = "reg_person", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
       "reg_person" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
@@ -29,7 +41,7 @@ public class SchemaContentForES {
       "reg_person_id" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
   private String reg_person_id;
   @PropertyKeyEnum
-  @IndexEnum(name = "type", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXT, indexList = {
+  @IndexEnum(name = "type", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
       "type" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
   private String type;
 
@@ -190,9 +202,9 @@ public class SchemaContentForES {
       "title" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
   private String title;
   @PropertyKeyEnum
-  @IndexEnum(name = "value", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
+  @IndexEnum(name = "value", index = { Index.Vertex, Index.Edge }, mapping = Mapping.NULL, indexList = {
       "value" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String value;
+  private Double value;
   @PropertyKeyEnum
   @IndexEnum(name = "targetID", index = { Index.Vertex }, mapping = Mapping.NULL, indexList = {
       "targetID" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
@@ -202,6 +214,16 @@ public class SchemaContentForES {
   @IndexEnum(name = "updatetime", index = { Index.Vertex, Index.Edge }, mapping = Mapping.NULL, indexList = {
       "updatetime" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
   private Long updatetime;
+  
+  @PropertyKeyEnum
+  @IndexEnum(name = "fvid", index = { Index.Edge }, mapping = Mapping.NULL, indexList = {
+      "fvid" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private Long fvid;
+  
+  @PropertyKeyEnum
+  @IndexEnum(name = "tvid", index = { Index.Edge }, mapping = Mapping.NULL, indexList = {
+      "tvid" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private Long tvid;
 
   // ----------------------------------------
 

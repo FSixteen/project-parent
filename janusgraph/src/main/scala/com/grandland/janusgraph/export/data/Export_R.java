@@ -25,7 +25,7 @@ import net.sf.json.JSONObject;
  */
 public class Export_R {
   public static void main(String[] args) {
-    long offset = Long.valueOf(args[1]);
+    long offset = -1L;
     BufferedReader reader = null;
     FileWriter writer = null;
     try {
@@ -60,6 +60,8 @@ public class Export_R {
             Vertex endV = endVs.next();
             Edge e = startV.addEdge(type, endV);
             e.property("targetID", targetID);
+            e.property("fvid",startV.id());
+            e.property("tvid",endV.id());
             for (Object key : properties.keySet()) {
               e.property((String) key, properties.get((String) key));
             }
@@ -80,10 +82,10 @@ public class Export_R {
             writer.write("\r\n");
           }
           size++;
-          if (size % 50 == 0) {
-            System.out.println(size);
+          if (size % 200 == 0) {
             g.tx().commit();
             g.tx().open();
+            System.out.println(size);
             writer.flush();
           }
         } else {

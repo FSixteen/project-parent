@@ -1,6 +1,7 @@
 package com.grandland.janusgraph.core;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 
 import org.janusgraph.core.Multiplicity;
 import org.janusgraph.core.PropertyKey;
@@ -66,7 +67,7 @@ public final class BuildSchema {
       }
     }
 
-    /*
+     /*
     System.out.println("---开始处理IndexEnum注解---");
     for (Field field : fields) {
       String fieldName = field.getName();
