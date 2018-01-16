@@ -13,213 +13,195 @@ import com.grandland.janusgraph.annotation.VertexLabelEnum;
 public class SchemaContentForES {
 
   @PropertyKeyEnum
-  @IndexEnum(name = "name", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "name" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String name;
-  
-  @PropertyKeyEnum
-  @IndexEnum(name = "region", index = { Index.Vertex }, mapping = Mapping.NULL, indexList = {
-      "region" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private Long region;
-  
-  @PropertyKeyEnum
   @IndexEnum(name = "uid", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
       "uid" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
   private String uid;
-  
+
   @PropertyKeyEnum
   @IndexEnum(name = "uid_short", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
       "uid_short" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
   private String uid_short;
-  
+
   @PropertyKeyEnum
-  @IndexEnum(name = "reg_person", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "reg_person" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String reg_person;
+  @IndexEnum(name = "name", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
+      "name" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String name;
+
   @PropertyKeyEnum
-  @IndexEnum(name = "reg_person_id", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "reg_person_id" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String reg_person_id;
+  @IndexEnum(name = "birthday", index = { Index.Vertex }, mapping = Mapping.STRING, indexList = {
+      "birthday" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String birthday;
   @PropertyKeyEnum
-  @IndexEnum(name = "type", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "type" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String type;
+  @IndexEnum(name = "address", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
+      "address" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String address;
+
+  @PropertyKeyEnum
+  @IndexEnum(name = "sex", index = { Index.Vertex }, mapping = Mapping.STRING, indexList = {
+      "sex" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String sex;
+
+  @PropertyKeyEnum
+  @IndexEnum(name = "phone", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
+      "phone" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String phone;
+
+  @PropertyKeyEnum
+  @IndexEnum(name = "education", index = { Index.Vertex }, mapping = Mapping.TEXTSTRING, indexList = {
+      "education" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String education;
+
+  @PropertyKeyEnum
+  @IndexEnum(name = "cardno", index = { Index.Vertex }, mapping = Mapping.TEXTSTRING, indexList = {
+      "cardno" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String cardno;
 
   @PropertyKeyEnum
   @IndexEnum(name = "ptype", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
       "ptype" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
   private String ptype;
+
+  /** 法人姓名 */
+  @PropertyKeyEnum
+  @IndexEnum(name = "reg_person", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
+      "reg_person" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String reg_person;
+
+  @PropertyKeyEnum
+  @IndexEnum(name = "money", index = { Index.Vertex, Index.Edge }, mapping = Mapping.NULL, indexList = {
+      "money" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private Double money;
+
+  @PropertyKeyEnum
+  @IndexEnum(name = "time", index = { Index.Vertex, Index.Edge }, mapping = Mapping.STRING, indexList = {
+      "time" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String time;
+
+  @PropertyKeyEnum
+  @IndexEnum(name = "timestamp", index = { Index.Vertex, Index.Edge }, mapping = Mapping.NULL, indexList = {
+      "timestamp" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private Long timestamp;
+
+  @PropertyKeyEnum
+  @IndexEnum(name = "state", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
+      "state" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String state;
+
+  @PropertyKeyEnum
+  @IndexEnum(name = "scope", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
+      "scope" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String scope;
+
+  @PropertyKeyEnum
+  @IndexEnum(name = "tag", index = { Index.Vertex, Index.Edge }, mapping = Mapping.NULL, indexList = {
+      "tag" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private Long tag;
+
   @PropertyKeyEnum
   @IndexEnum(name = "ctype", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
       "ctype" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
   private String ctype;
+
+  @PropertyKeyEnum
+  @IndexEnum(name = "regioncode", index = { Index.Vertex, Index.Edge }, mapping = Mapping.STRING, indexList = {
+      "regioncode" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String regioncode;
+
+  @PropertyKeyEnum
+  @IndexEnum(name = "regionname", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
+      "regionname" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String regionname;
+
   @PropertyKeyEnum
   @IndexEnum(name = "dtype", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
       "dtype" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
   private String dtype;
 
   @PropertyKeyEnum
-  @IndexEnum(name = "state", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "state" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String state;
-  @PropertyKeyEnum
-  @IndexEnum(name = "establish_time", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "establish_time" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String establish_time;
-  @PropertyKeyEnum
-  @IndexEnum(name = "reg_capital", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "reg_capital" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String reg_capital;
-  @PropertyKeyEnum
-  @IndexEnum(name = "scope", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "scope" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String scope;
-  @PropertyKeyEnum
-  @IndexEnum(name = "internal_num", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "internal_num" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String internal_num;
-  @PropertyKeyEnum
-  @IndexEnum(name = "reg_org_name", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "reg_org_name" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String reg_org_name;
-  @PropertyKeyEnum
-  @IndexEnum(name = "person_name", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "person_name" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String person_name;
-  @PropertyKeyEnum
-  @IndexEnum(name = "duty", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "duty" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String duty;
-  @PropertyKeyEnum
-  @IndexEnum(name = "person_id", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "person_id" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String person_id;
-  @PropertyKeyEnum
-  @IndexEnum(name = "subscribed_amount", index = { Index.Vertex, Index.Edge }, mapping = Mapping.NULL, indexList = {
-      "subscribed_amount" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private Double subscribed_amount;
-  @PropertyKeyEnum
-  @IndexEnum(name = "percent", index = { Index.Vertex, Index.Edge }, mapping = Mapping.NULL, indexList = {
-      "percent" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private Double percent;
+  @IndexEnum(name = "tips", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
+      "tips" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String tips;
+
   @PropertyKeyEnum
   @IndexEnum(name = "real_amount", index = { Index.Vertex, Index.Edge }, mapping = Mapping.NULL, indexList = {
       "real_amount" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
   private Double real_amount;
 
-  // ----------------------------------------
-
-  @PropertyKeyEnum
-  @IndexEnum(name = "bet", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "bet" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String bet;
-  @PropertyKeyEnum
-  @IndexEnum(name = "born", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "born" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String born;
-  @PropertyKeyEnum
-  @IndexEnum(name = "date", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "date" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String date;
-  @PropertyKeyEnum
-  @IndexEnum(name = "degree", index = { Index.Vertex, Index.Edge }, mapping = Mapping.NULL, indexList = {
-      "degree" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private Integer degree;
-  @PropertyKeyEnum
-  @IndexEnum(name = "invest", index = { Index.Vertex, Index.Edge }, mapping = Mapping.NULL, indexList = {
-      "invest" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private Double invest;
-  @PropertyKeyEnum
-  @IndexEnum(name = "membership", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "membership" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String membership;
-  @PropertyKeyEnum
-  @IndexEnum(name = "money", index = { Index.Vertex, Index.Edge }, mapping = Mapping.NULL, indexList = {
-      "money" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private Double money;
-  @PropertyKeyEnum
-  @IndexEnum(name = "money_invest", index = { Index.Vertex, Index.Edge }, mapping = Mapping.NULL, indexList = {
-      "money_invest" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private Double money_invest;
-  @PropertyKeyEnum
-  @IndexEnum(name = "money_invest_h", index = { Index.Vertex, Index.Edge }, mapping = Mapping.NULL, indexList = {
-      "money_invest_h" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private Double money_invest_h;
-  @PropertyKeyEnum
-  @IndexEnum(name = "order", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "order" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String order;
-  @PropertyKeyEnum
-  @IndexEnum(name = "pageRank", index = { Index.Vertex, Index.Edge }, mapping = Mapping.NULL, indexList = {
-      "pageRank" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private Double pageRank;
-  @PropertyKeyEnum
-  @IndexEnum(name = "rating", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "rating" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String rating;
-  @PropertyKeyEnum
-  @IndexEnum(name = "reg_num", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "reg_num" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String reg_num;
-  @PropertyKeyEnum
-  @IndexEnum(name = "released", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "released" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String released;
   @PropertyKeyEnum
   @IndexEnum(name = "role", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
       "role" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
   private String role;
+
   @PropertyKeyEnum
-  @IndexEnum(name = "roles", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "roles" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String roles;
+  @IndexEnum(name = "subscribed_amount", index = { Index.Vertex, Index.Edge }, mapping = Mapping.NULL, indexList = {
+      "subscribed_amount" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private Double subscribed_amount;
+
   @PropertyKeyEnum
-  @IndexEnum(name = "summary", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "summary" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String summary;
+  @IndexEnum(name = "percent", index = { Index.Vertex, Index.Edge }, mapping = Mapping.NULL, indexList = {
+      "percent" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private Double percent;
+
   @PropertyKeyEnum
-  @IndexEnum(name = "tagline", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "tagline" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String tagline;
+  @IndexEnum(name = "status", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
+      "status" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String status;
+
   @PropertyKeyEnum
-  @IndexEnum(name = "tax", index = { Index.Vertex, Index.Edge }, mapping = Mapping.NULL, indexList = {
-      "tax" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private Double tax;
+  @IndexEnum(name = "registname", index = { Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
+      "registname" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String registname;
+
   @PropertyKeyEnum
-  @IndexEnum(name = "time", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "time" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String time;
+  @IndexEnum(name = "registid", index = { Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
+      "registid" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String registid;
+
   @PropertyKeyEnum
-  @IndexEnum(name = "time_stamp", index = { Index.Vertex, Index.Edge }, mapping = Mapping.NULL, indexList = {
-      "time_stamp" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private Long time_stamp;
+  @IndexEnum(name = "duty", index = { Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
+      "duty" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String duty;
+
   @PropertyKeyEnum
-  @IndexEnum(name = "tips", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "tips" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String tips;
+  @IndexEnum(name = "membership", index = { Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
+      "membership" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String membership;
+
   @PropertyKeyEnum
-  @IndexEnum(name = "title", index = { Index.Vertex, Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
-      "title" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private String title;
+  @IndexEnum(name = "category", index = { Index.Edge }, mapping = Mapping.TEXTSTRING, indexList = {
+      "category" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String category;
+
   @PropertyKeyEnum
-  @IndexEnum(name = "value", index = { Index.Vertex, Index.Edge }, mapping = Mapping.NULL, indexList = {
-      "value" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private Double value;
+  @IndexEnum(name = "jointime", index = { Index.Edge }, mapping = Mapping.STRING, indexList = {
+      "jointime" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String jointime;
+
   @PropertyKeyEnum
-  @IndexEnum(name = "targetID", index = { Index.Vertex }, mapping = Mapping.NULL, indexList = {
-      "targetID" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
-  private Long targetID;
+  @IndexEnum(name = "jointimestamp", index = { Index.Edge }, mapping = Mapping.NULL, indexList = {
+      "jointimestamp" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private Long jointimestamp;
+
+  @PropertyKeyEnum
+  @IndexEnum(name = "type", index = { Index.Vertex, Index.Edge }, mapping = Mapping.STRING, indexList = {
+      "type" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private String type;
 
   @PropertyKeyEnum
   @IndexEnum(name = "updatetime", index = { Index.Vertex, Index.Edge }, mapping = Mapping.NULL, indexList = {
       "updatetime" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
   private Long updatetime;
-  
+
+  @PropertyKeyEnum
+  @IndexEnum(name = "neo4jid", index = { Index.Vertex }, mapping = Mapping.NULL, indexList = {
+      "neo4jid" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private Long neo4jid;
+
   @PropertyKeyEnum
   @IndexEnum(name = "fvid", index = { Index.Edge }, mapping = Mapping.NULL, indexList = {
       "fvid" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
   private Long fvid;
-  
+
   @PropertyKeyEnum
   @IndexEnum(name = "tvid", index = { Index.Edge }, mapping = Mapping.NULL, indexList = {
       "tvid" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
@@ -237,10 +219,7 @@ public class SchemaContentForES {
   public String Department;
 
   @VertexLabelEnum
-  public String ORG;
-
-  @VertexLabelEnum
-  public String Car;
+  private String Office;
 
   // ----------------------------------------
 

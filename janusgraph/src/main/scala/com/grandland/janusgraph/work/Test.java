@@ -1,10 +1,14 @@
 package com.grandland.janusgraph.work;
 
-import com.grandland.janusgraph.core.LongEncoding;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 public class Test {
   public static void main(String[] args) {
-//    System.out.println(Double.valueOf(80000));
-    System.out.println(LongEncoding.encode(1080590520));
+    try {
+      System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2018-01-16 11:30:42").getTime());
+    } catch (ParseException e) {
+      e.printStackTrace();
+    }
   }
 }
