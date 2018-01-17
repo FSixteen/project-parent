@@ -21,18 +21,18 @@ import net.sf.json.JSONObject;
  *
  */
 public class Export_V_Old {
-  private static Boolean c = false;
-  private static Boolean d = false;
-  private static Boolean p = false;
+  private static Boolean c = false;  // 是否处理Company
+  private static Boolean d = false;  // 是否处理Department
+  private static Boolean p = false;  // 是否处理Person
   
   @SuppressWarnings({ "resource" })
   public static void main(String[] args) {
-    FileWriter cwriter = null;
-    FileWriter dwriter = null;
-    FileWriter pwriter = null;
+    FileWriter cwriter = null; // 记录Company的信息
+    FileWriter dwriter = null; // 记录Department的信息
+    FileWriter pwriter = null; // 记录Person的信息
     BufferedReader reader = null;
     try {
-      reader = new BufferedReader(new FileReader(new File(args[0])));
+      reader = new BufferedReader(new FileReader(new File(args[0]))); // 执行数据源
       cwriter = new FileWriter(args[0] + "_c");
       dwriter = new FileWriter(args[0] + "_d");
       pwriter = new FileWriter(args[0] + "_p");

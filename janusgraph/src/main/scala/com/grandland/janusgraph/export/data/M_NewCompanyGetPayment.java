@@ -30,45 +30,67 @@ import com.grandland.janusgraph.core.ESConnection;
 import com.grandland.janusgraph.core.GraphFactory;
 import com.grandland.janusgraph.core.LongEncoding;
 
-public class NewCompanyGetPayment {
+/**
+ * 寻找新办企业获得注资.
+ * 
+ * @author Shengjun Liu<br/>
+ * @version 2018-01-17<br/>
+ *
+ */
+public class M_NewCompanyGetPayment {
   public static void main(String[] args) {
     GraphTraversalSource g = GraphFactory.getInstance().builderConfig().getG();
-    for (int page = 0; page < Integer.MAX_VALUE; page++) {
+    for (Integer page = 0;; page++) {
+      /** 保存ES中获取的Company的ID信息 */
       ArrayList<Long> ids = new ArrayList<Long>();
-      ids.clear();
+      /** 从ES中获取的Company的ID信息,放入{es_id_s}中 */
       esGet(ids, page);
+      /** 如果从ES里面获取的Company的ID信息为0, 说明已经执行完成 */
       if (0 == ids.size()) {
         break;
       } else {
         System.out.println("第" + page + "页!");
+        System.out.println("ids::::::" + ids.size());
       }
-      System.out.println("ids::::::" + ids.size());
       ids.parallelStream().forEach((id) -> {
-        List<Map<String, Object>> links = new ArrayList<>();
+        List<Map<String, Object>> relations = new ArrayList<>();
         CacheVertex fromVertex = null;
-        HashSet<Long> nodes = new HashSet<Long>();
+        HashSet<Long> vertices = new HashSet<Long>();
         Double money = 0.0;
-        GraphTraversal<Vertex, Map<String, Object>> result = g.V(id).has("type", "Company").as("a").inE()
-            .has("type", "PAYMENT").as("r").outV().has("type", "Department").as("b").select("a", "b").dedup();
+        GraphTraversal<Vertex, Map<String, Object>> result = g.V(id).has("type", "Company").as("a").inE().has("type", "PAYMENT").as("r").outV().has("type", "Department").as("b").select("a", "b")
+            .dedup();
         while (result.hasNext()) {
           Map<String, Object> r = result.next();
           if (null == fromVertex) {
             fromVertex = (CacheVertex) r.get("a");
+            vertices.add((Long) ((CacheVertex) r.get("a")).id());
           }
-          nodes.add((Long) ((CacheVertex) r.get("a")).id());
-          nodes.add((Long) ((CacheVertex) r.get("b")).id());
+          vertices.add((Long) ((CacheVertex) r.get("b")).id());
         }
-        if (null != fromVertex && 0 < nodes.size()) {
-          GraphTraversal<Vertex, String> moneyTemp = g.V(id).has("type", "Company").as("a").inE().has("type", "PAYMENT")
-              .as("r").outV().has("type", "Department").as("b").select("r").dedup().values("value");
-          while (moneyTemp.hasNext()) {
+        if (null != fromVertex && 0 < vertices.size()) {
+          // 处理金额
+          GraphTraversal<Vertex, Object> moneyTemps = g.V(id).has("type", "Company").as("a").inE().has("type", "PAYMENT").as("r").outV().has("type", "Department").as("b").select("r").dedup()
+              .values("money");
+          while (moneyTemps.hasNext()) {
             try {
-              money += Double.valueOf(moneyTemp.next());
+              Object moneyTemp = moneyTemps.next();
+              if (moneyTemp instanceof Long) {
+                money += Double.valueOf((Long) moneyTemp);
+              } else if (moneyTemp instanceof Integer) {
+                money += Double.valueOf((Integer) moneyTemp);
+              } else if (moneyTemp instanceof Double) {
+                money += (Double) moneyTemp;
+              } else if (moneyTemp instanceof String) {
+                money += Double.valueOf((String) moneyTemp);
+              } else {
+                ;
+              }
             } catch (Exception e) {
+              ;
             }
           }
-          GraphTraversal<Vertex, Object> countTemp = g.V(id).has("type", "Company").as("a").inE().as("r").outV()
-              .has("type", "Department").as("b").select("r");
+          // 处理关系
+          GraphTraversal<Vertex, Object> countTemp = g.V(id).has("type", "Company").as("a").inE().as("r").outV().has("type", "Department").as("b").select("r");
           Map<Long, Map<String, Long>> count = new HashMap<>();
           while (countTemp.hasNext()) {
             CacheEdge r = (CacheEdge) countTemp.next();
@@ -94,9 +116,9 @@ public class NewCompanyGetPayment {
               link.put("fvid", id);
               link.put("tvid", _1);
               link.put("type", __1);
-              link.put("size", __2);
+              link.put("count", __2);
             });
-            links.add(link);
+            relations.add(link);
           });
           Iterator<VertexProperty<Object>> uidT = fromVertex.properties("uid");
           Iterator<VertexProperty<Object>> nameT = fromVertex.properties("name");
@@ -113,18 +135,33 @@ public class NewCompanyGetPayment {
           if (timeT.hasNext()) {
             time = (String) timeT.next().value();
           }
-          addES(id, uid, name, time, money, nodes, links);
+          addES(id, uid, name, time, money, vertices, relations);
         }
       });
     }
     GraphFactory.getInstance().close();
   }
 
-  public static final void addES(Long id, String uid, String name, String time, Double money, HashSet<Long> nodes,
-      List<Map<String, Object>> links) {
+  /**
+   * 
+   * @param id
+   *          顶点id
+   * @param uid
+   *          顶点uid
+   * @param name
+   *          顶点name
+   * @param time
+   *          注册时间
+   * @param money
+   *          注资金额
+   * @param nodes
+   *          牵扯到节点信息
+   * @param links
+   *          牵扯到的关系信息
+   */
+  public static final void addES(Long id, String uid, String name, String time, Double money, HashSet<Long> nodes, List<Map<String, Object>> links) {
     TransportClient client = ESConnection.getClient();
-    IndexRequestBuilder requestBuilder = client.prepareIndex("janusgraph_all_findnewcompany", "all_findnewcompany",
-        LongEncoding.encode(id));
+    IndexRequestBuilder requestBuilder = client.prepareIndex("janusgraph_all_findnewcompany", "all_findnewcompany", LongEncoding.encode(id));
     Map<String, Object> source = new HashMap<>();
     source.put("id", id);
     source.put("uid", uid);
@@ -138,9 +175,12 @@ public class NewCompanyGetPayment {
     source.put("money", money);
     source.put("nodes", nodes);
     source.put("links", links);
+    source.put("type", "NewCompanyGetPayment");
     requestBuilder.setSource(source);
-    System.out.println(new Gson().toJson(source));
     requestBuilder.execute().actionGet();
+    System.out.println("-----------------------------------------------");
+    System.out.println(new Gson().toJson(source));
+    System.out.println("-----------------------------------------------");
   }
 
   /**
@@ -152,8 +192,7 @@ public class NewCompanyGetPayment {
     System.out.println("开始拉取ES数据");
     final Integer size = 1000000;
     TransportClient client = ESConnection.getClient();
-    SearchRequestBuilder prepareSearch = client.prepareSearch().setIndices("janusgraph_all_vertex")
-        .setTypes("all_vertex");
+    SearchRequestBuilder prepareSearch = client.prepareSearch().setIndices("janusgraph_all_vertex").setTypes("all_vertex");
     prepareSearch.setFrom(page * size).setSize(size);
     BoolQueryBuilder boolQuery = QueryBuilders.boolQuery().must(QueryBuilders.matchPhraseQuery("type", "Company"));
     prepareSearch.setQuery(boolQuery);
