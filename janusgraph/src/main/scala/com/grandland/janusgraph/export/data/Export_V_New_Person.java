@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 
 import org.janusgraph.core.JanusGraphTransaction;
 import org.janusgraph.core.JanusGraphVertex;
@@ -14,12 +13,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.grandland.janusgraph.core.GraphFactory;
 
-public class Export_Person {
+public class Export_V_New_Person {
   @SuppressWarnings({ "unchecked", "resource" })
   public static void main(String[] args) {
     BufferedReader reader = null;
     Gson gson = new GsonBuilder().disableHtmlEscaping().create();
     try {
+//      reader = new BufferedReader(new FileReader("C:/Users/Administrator/Desktop/2018.01.17.person.txt"));
       reader = new BufferedReader(new FileReader(new File(args[0])));
       String tempString = null;
       long size = 0;
@@ -27,11 +27,29 @@ public class Export_Person {
       JanusGraphTransaction tx = GraphFactory.getInstance().getGraph().newTransaction();
       while ((tempString = reader.readLine()) != null) {
         if (tempString.length() > 20) {
-          Map<String, String> list = gson.fromJson(tempString, HashMap.class);
+          HashMap<String, String> list = null;
+          try {
+            list = gson.fromJson(tempString, HashMap.class);
+          } catch (Exception e) {
+            System.out.println(size + ":::" + tempString);
+            continue;
+          }
           JanusGraphVertex v = tx.addVertex(org.apache.tinkerpop.gremlin.structure.T.label, "Person");
           v.property("type", "Person");
           v.property("uid", list.get("uid"));
-          v.property("name", list.get("name"));
+          String name = list.get("name");
+          if (null != name) {
+            name = name.trim();
+            if (name.startsWith(",")) {
+              name = name.substring(1);
+            }
+            if (name.endsWith(",")) {
+              name = name.substring(0, name.length() - 1);
+            }
+          }else {
+            name = "";
+          }
+          v.property("name", name);
           String birthday = uid2birthday(list.get("uid"));
           if (null != birthday && 10 == birthday.trim().length()) {
             v.property("birthday", birthday);
@@ -52,12 +70,23 @@ public class Export_Person {
           if (null != list.get("cardno") && 0 < list.get("cardno").trim().length()) {
             v.property("cardno", list.get("cardno"));
           }
-          if (null != list.get("ptype") && 0 < list.get("ptype").trim().length()) {
+          String ptype = list.get("ptype");
+          if (null != ptype) {
+            ptype = ptype.trim();
+            if (ptype.startsWith(",")) {
+              ptype = ptype.substring(1);
+            }
+            if (ptype.endsWith(",")) {
+              ptype = ptype.substring(0, ptype.length() - 1);
+            }
+          }
+          if (null != ptype && 0 < ptype.length()) {
             v.property("ptype", list.get("ptype"));
           }
+          v.property("tag", 2);
           v.property("updatetime", System.currentTimeMillis());
           size++;
-          if (size % 200 == 0) {
+          if (size % 400 == 0) {
             tx.commit();
             tx = GraphFactory.getInstance().getGraph().newTransaction();
             System.out.println(size);

@@ -8,7 +8,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -17,8 +19,6 @@ import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.sort.SortOrder;
@@ -31,45 +31,55 @@ import com.grandland.janusgraph.core.GraphFactory;
 import com.grandland.janusgraph.core.LongEncoding;
 
 /**
- * 寻找新办企业获得注资.
+ * 概览大图, type=2
  * 
  * @author Shengjun Liu<br/>
  * @version 2018-01-17<br/>
  *
  */
-public class M_GaiLan {
+public class M_GaiLan_Type2 {
+  public static AtomicInteger size = new AtomicInteger(0);
+  
   public static void main(String[] args) {
     GraphTraversalSource g = GraphFactory.getInstance().builderConfig().getG();
     for (Integer page = 0;; page++) {
-      /** 保存ES中获取的Company的ID信息 */
+      /** 保存ES中获取的Department的ID信息 */
       ArrayList<Long> ids = new ArrayList<Long>();
-      /** 从ES中获取的Company的ID信息,放入{es_id_s}中 */
+      /** 从ES中获取的Department的ID信息,放入{es_id_s}中 */
       esGet(ids, page);
-      /** 如果从ES里面获取的Company的ID信息为0, 说明已经执行完成 */
+      /** 如果从ES里面获取的Department的ID信息为0, 说明已经执行完成 */
       if (0 == ids.size()) {
         break;
       } else {
         System.out.println("第" + page + "页!");
         System.out.println("ids::::::" + ids.size());
       }
+      // @Query("match p=(a:b:Department)-[:PAYMENT]-(b:Company) where b.state <> '注销企业' return a as startnode ,nodes(p) as nodes,rels(p) as links,length(p) as length order by a.money desc limit 200")
       ids.parallelStream().forEach((id) -> {
+        // 关系
         List<Map<String, Object>> relations = new ArrayList<>();
+        // 出发节点
         CacheVertex fromVertex = null;
+        // 关联的点
         HashSet<Long> vertices = new HashSet<Long>();
+        // Department指出的总金额
         Double money = 0.0;
-        GraphTraversal<Vertex, Map<String, Object>> result = g.V(id).has("type", "Company").as("a").inE().has("type", "PAYMENT").as("r").outV().has("type", "Department").as("b").select("a", "b")
+        // 查找关系开始
+        GraphTraversal<Vertex, Map<String, Object>> result = g.V(id).has("type", "Department").as("a").outE().has("type", "PAYMENT").as("r").inV().has("type", "Company").has("state", P.neq("注销企业")).as("b").select("a", "b")
             .dedup();
+        // 处理所有节点信息
         while (result.hasNext()) {
           Map<String, Object> r = result.next();
           if (null == fromVertex) {
             fromVertex = (CacheVertex) r.get("a");
-            vertices.add((Long) ((CacheVertex) r.get("a")).id());
+            vertices.add((Long) fromVertex.id());
           }
           vertices.add((Long) ((CacheVertex) r.get("b")).id());
         }
+        // 如果有点, 则进行关系处理
         if (null != fromVertex && 0 < vertices.size()) {
           // 处理金额
-          GraphTraversal<Vertex, Object> moneyTemps = g.V(id).has("type", "Company").as("a").inE().has("type", "PAYMENT").as("r").outV().has("type", "Department").as("b").select("r").dedup()
+          GraphTraversal<Vertex, Object> moneyTemps = g.V(id).has("type", "Department").as("a").outE().has("type", "PAYMENT").as("r").inV().has("type", "Company").has("state", P.neq("注销企业")).as("b").select("r").dedup()
               .values("money");
           while (moneyTemps.hasNext()) {
             try {
@@ -80,6 +90,8 @@ public class M_GaiLan {
                 money += Double.valueOf((Integer) moneyTemp);
               } else if (moneyTemp instanceof Double) {
                 money += (Double) moneyTemp;
+              } else if (moneyTemp instanceof Float) {
+                money += (Float) moneyTemp;
               } else if (moneyTemp instanceof String) {
                 money += Double.valueOf((String) moneyTemp);
               } else {
@@ -90,35 +102,63 @@ public class M_GaiLan {
             }
           }
           // 处理关系
-          GraphTraversal<Vertex, Object> countTemp = g.V(id).has("type", "Company").as("a").inE().as("r").outV().has("type", "Department").as("b").select("r");
-          Map<Long, Map<String, Long>> count = new HashMap<>();
+          GraphTraversal<Vertex, Object> countTemp = g.V(id).has("type", "Department").as("a").outE().has("type", "PAYMENT").as("r").inV().has("type", "Company").has("state", P.neq("注销企业")).as("b").select("r");
+          //  fvid      tvid      type    count
+          Map<Long, Map<Long, Map<String, Long>> > count = new HashMap<>();
           while (countTemp.hasNext()) {
             CacheEdge r = (CacheEdge) countTemp.next();
             org.janusgraph.graphdb.relations.RelationIdentifier edgeid = r.id();
             String type = r.label();
-            long outVid = edgeid.getOutVertexId();
-            if (count.containsKey(outVid)) {
-              Map<String, Long> t = count.get(outVid);
-              if (t.containsKey(type)) {
-                t.put(type, t.get(type) + 1);
+            long fvid = edgeid.getOutVertexId();
+            long tvid = edgeid.getInVertexId();
+            //                    fvid
+            if (count.containsKey(fvid)) {
+              //  tvid      type    count                 fvid
+              Map<Long, Map<String, Long>> _2 = count.get(fvid);
+              //                 fvid
+              if (_2.containsKey(tvid)) {
+                //  type    count            fvid
+                Map<String, Long> _3 = _2.get(tvid);
+                //                 type
+                if (_3.containsKey(type)) {
+                  //     type          count
+                  _3.put(type, _3.get(type) + 1);
+                } else {
+                  //     type count
+                  _3.put(type, 1L);
+                }
               } else {
-                t.put(type, 1L);
+                //  type    count
+                Map<String, Long> map = new HashMap<String, Long>();
+                //      type    count
+                map.put(type, 1L);
+                //     tvid  <type,count>
+                _2.put(tvid, map);
               }
             } else {
-              Map<String, Long> t = new HashMap<>();
-              t.put(type, 1L);
-              count.put(outVid, t);
+              //  tvid      type    count
+              Map<Long, Map<String, Long>> _2 = new HashMap<>();
+              //   type    count
+              Map<String, Long> _3 = new HashMap<>();
+              //     type  count
+              _3.put(type, 1L);
+              //     tvid  <type,count>
+              _2.put(tvid, _3);
+              //        fvid  <tvid,<type,count>>
+              count.put(fvid, _2);
             }
           }
-          count.forEach((Long _1, Map<String, Long> _2) -> {
-            Map<String, Object> link = new HashMap<>();
-            _2.forEach((String __1, Long __2) -> {
-              link.put("fvid", id);
-              link.put("tvid", _1);
-              link.put("type", __1);
-              link.put("count", __2);
+          count.forEach((Long fvid, Map<Long, Map<String, Long>> _2)->{
+            _2.forEach((Long tvid, Map<String, Long> _3)->{
+              _3.forEach((String type, Long _4_count)->{
+                Map<String, Object> link = new HashMap<>();
+                link.put("fvid", fvid);
+                link.put("tvid", tvid);
+                link.put("type", type);
+                link.put("count", _4_count);
+                relations.add(link);
+              });
             });
-            relations.add(link);
           });
           Iterator<VertexProperty<Object>> uidT = fromVertex.properties("uid");
           Iterator<VertexProperty<Object>> nameT = fromVertex.properties("name");
@@ -136,6 +176,10 @@ public class M_GaiLan {
             time = (String) timeT.next().value();
           }
           addES(id, uid, name, time, money, vertices, relations);
+        }
+        size.addAndGet(1);
+        if(size.get() % 100 == 0){
+          System.out.println("size::::" + size);
         }
       });
     }
@@ -161,21 +205,22 @@ public class M_GaiLan {
    */
   public static final void addES(Long id, String uid, String name, String time, Double money, HashSet<Long> nodes, List<Map<String, Object>> links) {
     TransportClient client = ESConnection.getClient();
-    IndexRequestBuilder requestBuilder = client.prepareIndex("janusgraph_all_findnewcompany", "all_findnewcompany", LongEncoding.encode(id));
+    IndexRequestBuilder requestBuilder = client.prepareIndex("janusgraph_all_gailantype2d", "a", LongEncoding.encode(id));
     Map<String, Object> source = new HashMap<>();
     source.put("id", id);
     source.put("uid", uid);
     source.put("name", name);
     source.put("time", time);
     try {
-      source.put("time_stamp", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time).getTime());
+      source.put("timestamp", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time).getTime());
     } catch (ParseException e) {
-      return;
+      // return;
     }
     source.put("money", money);
     source.put("nodes", nodes);
     source.put("links", links);
-    source.put("type", "NewCompanyGetPayment");
+    source.put("updatetime", System.currentTimeMillis());
+    source.put("type", "GaiLanTypeIsTwoForD");
     requestBuilder.setSource(source);
     requestBuilder.execute().actionGet();
     System.out.println("-----------------------------------------------");
@@ -184,19 +229,17 @@ public class M_GaiLan {
   }
 
   /**
-   * 获取所有Company的ID
+   * 获取所有Department的ID
    * 
    * @param ids
    */
   public static final void esGet(ArrayList<Long> ids, Integer page) {
+    
     System.out.println("开始拉取ES数据");
-    final Integer size = 3000000;
+    final Integer size = 100000;
     TransportClient client = ESConnection.getClient();
-    SearchRequestBuilder prepareSearch = client.prepareSearch().setIndices("janusgraph_all_vertex").setTypes("all_vertex");
+    SearchRequestBuilder prepareSearch = client.prepareSearch().setIndices("janusgraph_all_gailantype2d").setTypes("a");
     prepareSearch.setFrom(page * size).setSize(size);
-    BoolQueryBuilder boolQuery = QueryBuilders.boolQuery().must(QueryBuilders.matchPhraseQuery("type", "Company"));
-    boolQuery.mustNot(QueryBuilders.matchPhraseQuery("state__STRING", "注销企业"));
-    prepareSearch.setQuery(boolQuery);
     prepareSearch.addSort("updatetime", SortOrder.DESC);
     prepareSearch.storedFields();
     SearchResponse searchResponse = prepareSearch.get();
@@ -205,6 +248,23 @@ public class M_GaiLan {
       ids.add(LongEncoding.decode(hits.getId()));
     });
     System.out.println("结束拉取ES数据");
+    
+//    System.out.println("开始拉取ES数据");
+//    final Integer size = 3000000;
+//    TransportClient client = ESConnection.getClient();
+//    SearchRequestBuilder prepareSearch = client.prepareSearch().setIndices("janusgraph_all_vertex").setTypes("all_vertex");
+//    prepareSearch.setFrom(page * size).setSize(size);
+//    BoolQueryBuilder boolQuery = QueryBuilders.boolQuery().must(QueryBuilders.matchPhraseQuery("type", "Department"));
+//    boolQuery.mustNot(QueryBuilders.matchPhraseQuery("state__STRING", "注销企业"));
+//    prepareSearch.setQuery(boolQuery);
+//    prepareSearch.addSort("updatetime", SortOrder.DESC);
+//    prepareSearch.storedFields();
+//    SearchResponse searchResponse = prepareSearch.get();
+//    SearchHits searchHits = searchResponse.getHits();
+//    searchHits.forEach((SearchHit hits) -> {
+//      ids.add(LongEncoding.decode(hits.getId()));
+//    });
+//    System.out.println("结束拉取ES数据");
   }
 
 }

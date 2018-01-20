@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -18,6 +19,8 @@ import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.sort.SortOrder;
@@ -30,13 +33,15 @@ import com.grandland.janusgraph.core.GraphFactory;
 import com.grandland.janusgraph.core.LongEncoding;
 
 /**
- * 寻找新办企业获得注资.
+ * 概览大图, type=1
+ * 
+ * match p=(a:Company)-[r:INVEST_H|:INVEST_O]-(b) where a.state <> '注销企业' return a as startnode ,nodes(p) as nodes,rels(p) as links,length(p) as length limit 200
  * 
  * @author Shengjun Liu<br/>
  * @version 2018-01-17<br/>
  *
  */
-public class M_NewCompanyGetPayment {
+public class M_GaiLan_Type1 {
   public static AtomicInteger size = new AtomicInteger(0);
   
   public static void main(String[] args) {
@@ -46,46 +51,80 @@ public class M_NewCompanyGetPayment {
       ArrayList<Long> ids = new ArrayList<Long>();
       /** 从ES中获取的Company的ID信息,放入{es_id_s}中 */
       esGet(ids, page);
-      System.out.println("ids::size::" + ids.size());
-      /** 如果从ES里面获取的Company的ID信息为0, 说明已经执行完成 */
+      /** 如果从ES里面获取的Department的ID信息为0, 说明已经执行完成 */
       if (0 == ids.size()) {
         break;
       } else {
         System.out.println("第" + page + "页!");
         System.out.println("ids::::::" + ids.size());
       }
+      // match p=(a:Company)-[r:INVEST_H|:INVEST_O]-(b) where a.state <> '注销企业' return a as startnode ,nodes(p) as nodes,rels(p) as links,length(p) as length limit 200
       ids.parallelStream().forEach((id) -> {
+        // 关系
         List<Map<String, Object>> relations = new ArrayList<>();
+        // 出发节点
         CacheVertex fromVertex = null;
+        // 关联的点
         HashSet<Long> vertices = new HashSet<Long>();
+        // Company被投资的总金额
+        Double imoney = 0.0;
+        // Company投资的总金额
+        Double omoney = 0.0;
+        // Company投资的总金额
         Double money = 0.0;
-        GraphTraversal<Vertex, Map<String, Object>> result = g.V(id).has("type", "Company").as("a").inE().has("type", "PAYMENT").as("r").outV().has("type", "Department").as("b").select("a", "b")
+        // 查找关系开始
+        GraphTraversal<Vertex, Map<String, Object>> result = g.V(id).has("type", "Company").has("state", P.neq("注销企业")).as("a").bothE().has("type", P.within("INVEST_H", "INVEST_O")).as("r").otherV().as("b").select("a", "b")
             .dedup();
+        // 处理所有节点信息
         while (result.hasNext()) {
           Map<String, Object> r = result.next();
           if (null == fromVertex) {
             fromVertex = (CacheVertex) r.get("a");
-            vertices.add((Long) ((CacheVertex) r.get("a")).id());
+            vertices.add((Long) fromVertex.id());
           }
           vertices.add((Long) ((CacheVertex) r.get("b")).id());
         }
-        if (null != fromVertex && 0 < vertices.size()) {
-          // 处理金额
-          GraphTraversal<Vertex, Object> moneyTemps = g.V(id).has("type", "Company").as("a").inE().has("type", "PAYMENT").as("r").outV().has("type", "Department").as("b").select("r").dedup()
-              .values("money");
+        // 如果有点, 则进行关系处理
+        if (null != fromVertex && 1 < vertices.size()) {
+          // 处理被投资金额
+          GraphTraversal<Vertex, Object> moneyTemps = g.V(id).has("type", "Company").has("state", P.neq("注销企业")).as("a").inE().has("type", P.within("INVEST_H", "INVEST_O")).as("r").outV().as("b").select("r").dedup()
+              .values("real_amount");
           while (moneyTemps.hasNext()) {
             try {
-              Object moneyTemp = moneyTemps.next();
-              if (moneyTemp instanceof Long) {
-                money += Double.valueOf((Long) moneyTemp);
-              } else if (moneyTemp instanceof Integer) {
-                money += Double.valueOf((Integer) moneyTemp);
-              } else if (moneyTemp instanceof Double) {
-                money += (Double) moneyTemp;
-              } else if (moneyTemp instanceof Float) {
-                money += (Float) moneyTemp;
-              } else if (moneyTemp instanceof String) {
-                money += Double.valueOf((String) moneyTemp);
+              Object imoneyTemp = moneyTemps.next();
+              if (imoneyTemp instanceof Long) {
+                imoney += Double.valueOf((Long) imoneyTemp);
+              } else if (imoneyTemp instanceof Integer) {
+                imoney += Double.valueOf((Integer) imoneyTemp);
+              } else if (imoneyTemp instanceof Double) {
+                imoney += (Double) imoneyTemp;
+              } else if (imoneyTemp instanceof Float) {
+                imoney += (Float) imoneyTemp;
+              } else if (imoneyTemp instanceof String) {
+                imoney += Double.valueOf((String) imoneyTemp);
+              } else {
+                ;
+              }
+            } catch (Exception e) {
+              ;
+            }
+          }
+          // 处理投资金额
+          moneyTemps = g.V(id).has("type", "Company").has("state", P.neq("注销企业")).as("a").outE().has("type", P.within("INVEST_H", "INVEST_O")).as("r").inV().as("b").select("r").dedup()
+              .values("real_amount");
+          while (moneyTemps.hasNext()) {
+            try {
+              Object omoneyTemp = moneyTemps.next();
+              if (omoneyTemp instanceof Long) {
+                omoney += Double.valueOf((Long) omoneyTemp);
+              } else if (omoneyTemp instanceof Integer) {
+                omoney += Double.valueOf((Integer) omoneyTemp);
+              } else if (omoneyTemp instanceof Double) {
+                omoney += (Double) omoneyTemp;
+              } else if (omoneyTemp instanceof Float) {
+                omoney += (Float) omoneyTemp;
+              } else if (omoneyTemp instanceof String) {
+                omoney += Double.valueOf((String) omoneyTemp);
               } else {
                 ;
               }
@@ -94,7 +133,7 @@ public class M_NewCompanyGetPayment {
             }
           }
           // 处理关系
-          GraphTraversal<Vertex, Object> countTemp = g.V(id).has("type", "Company").as("a").inE().as("r").outV().has("type", "Department").as("b").select("r");
+          GraphTraversal<Vertex, Object> countTemp = g.V(id).has("type", "Company").has("state", P.neq("注销企业")).as("a").bothE().has("type", P.within("INVEST_H", "INVEST_O")).as("r").otherV().as("b").select("r");
           //  fvid      tvid      type    count
           Map<Long, Map<Long, Map<String, Long>> > count = new HashMap<>();
           while (countTemp.hasNext()) {
@@ -167,7 +206,8 @@ public class M_NewCompanyGetPayment {
           if (timeT.hasNext()) {
             time = (String) timeT.next().value();
           }
-          addES(id, uid, name, time, money, vertices, relations);
+          money = imoney * 0.5 + omoney * 0.5;
+          addES(id, uid, name, time, imoney, omoney, money, vertices, relations);
         }
         size.addAndGet(1);
         if(size.get() % 100 == 0){
@@ -188,16 +228,20 @@ public class M_NewCompanyGetPayment {
    *          顶点name
    * @param time
    *          注册时间
+   * @param imoney
+   *          被投资金额
+   * @param omoney
+   *          投资金额
    * @param money
-   *          注资金额
+   *          权衡后金额
    * @param nodes
    *          牵扯到节点信息
    * @param links
    *          牵扯到的关系信息
    */
-  public static final void addES(Long id, String uid, String name, String time, Double money, HashSet<Long> nodes, List<Map<String, Object>> links) {
+  public static final void addES(Long id, String uid, String name, String time, Double imoney, Double omoney, Double money, HashSet<Long> nodes, List<Map<String, Object>> links) {
     TransportClient client = ESConnection.getClient();
-    IndexRequestBuilder requestBuilder = client.prepareIndex("janusgraph_all_newcompany", "a", LongEncoding.encode(id));
+    IndexRequestBuilder requestBuilder = client.prepareIndex("janusgraph_all_gailantype1c", "a", LongEncoding.encode(id));
     Map<String, Object> source = new HashMap<>();
     source.put("id", id);
     source.put("uid", uid);
@@ -206,13 +250,15 @@ public class M_NewCompanyGetPayment {
     try {
       source.put("timestamp", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time).getTime());
     } catch (ParseException e) {
-      return;
+      // return;
     }
+    source.put("imoney", imoney);
+    source.put("omoney", omoney);
     source.put("money", money);
     source.put("nodes", nodes);
     source.put("links", links);
     source.put("updatetime", System.currentTimeMillis());
-    source.put("type", "NewCompanyGetPayment");
+    source.put("type", "GaiLanTypeIsOneForC");
     requestBuilder.setSource(source);
     requestBuilder.execute().actionGet();
     System.out.println("-----------------------------------------------");
@@ -221,17 +267,20 @@ public class M_NewCompanyGetPayment {
   }
 
   /**
-   * 获取所有Company的ID
+   * 获取所有Department的ID
    * 
    * @param ids
    */
   public static final void esGet(ArrayList<Long> ids, Integer page) {
-    
     System.out.println("开始拉取ES数据");
-    final Integer size = 1000;
+    final Integer size = 1000000;
     TransportClient client = ESConnection.getClient();
-    SearchRequestBuilder prepareSearch = client.prepareSearch().setIndices("janusgraph_all_newcompany").setTypes("a");
-    prepareSearch.setFrom(page * size).setSize(size).addSort("updatetime", SortOrder.DESC);
+    SearchRequestBuilder prepareSearch = client.prepareSearch().setIndices("janusgraph_all_vertex").setTypes("all_vertex");
+    prepareSearch.setFrom(page * size).setSize(size);
+    BoolQueryBuilder boolQuery = QueryBuilders.boolQuery().must(QueryBuilders.matchPhraseQuery("type", "Company"));
+    boolQuery.mustNot(QueryBuilders.matchPhraseQuery("state__STRING", "注销企业"));
+    prepareSearch.setQuery(boolQuery);
+    prepareSearch.addSort("updatetime", SortOrder.DESC);
     prepareSearch.storedFields();
     SearchResponse searchResponse = prepareSearch.get();
     SearchHits searchHits = searchResponse.getHits();
@@ -239,23 +288,6 @@ public class M_NewCompanyGetPayment {
       ids.add(LongEncoding.decode(hits.getId()));
     });
     System.out.println("结束拉取ES数据");
-    
-//    System.out.println("开始拉取ES数据");
-//    final Integer size = 1000000;
-//    TransportClient client = ESConnection.getClient();
-//    SearchRequestBuilder prepareSearch = client.prepareSearch().setIndices("janusgraph_all_vertex").setTypes("all_vertex");
-//    prepareSearch.setFrom(page * size).setSize(size);
-//    BoolQueryBuilder boolQuery = QueryBuilders.boolQuery().must(QueryBuilders.matchPhraseQuery("type", "Company"));
-//    boolQuery.must(QueryBuilders.rangeQuery("timestamp").gte(1420041600000L));
-//    prepareSearch.setQuery(boolQuery);
-//    prepareSearch.addSort("updatetime", SortOrder.DESC);
-//    prepareSearch.storedFields();
-//    SearchResponse searchResponse = prepareSearch.get();
-//    SearchHits searchHits = searchResponse.getHits();
-//    searchHits.forEach((SearchHit hits) -> {
-//      ids.add(LongEncoding.decode(hits.getId()));
-//    });
-//    System.out.println("结束拉取ES数据");
   }
 
 }

@@ -1,10 +1,12 @@
 package com.grandland.janusgraph.export.data;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
@@ -35,13 +37,17 @@ import com.grandland.janusgraph.core.LongEncoding;
  *
  */
 public class M_KinshipGetPayment {
+  public static AtomicInteger size = new AtomicInteger(0);
+  
   public static void main(String[] args) {
     GraphTraversalSource g = GraphFactory.getInstance().builderConfig().getG();
     for (Integer page = 0;; page++) {
       /** 保存ES中获取的Department的ID信息 */
       ArrayList<Long> es_id_s = new ArrayList<Long>();
       /** 从ES中获取的Department的ID信息,放入{es_id_s}中 */
-      esGet(es_id_s, page);
+//      esGet(es_id_s, page);
+      es_id_s.addAll(Arrays.asList(2608083016L, 2608111688L, 1304858872L, 1304961072L, 1304969264L, 1305002120L, 1306742904L, 1305251992L, 1306976320L, 1305858112L, 1305903168L, 1305919608L, 1306239128L, 409848L,
+          1306321040L, 1306325144L, 1306382480L, 1306402960L));
       /** 如果从ES里面获取的Department的ID信息为0, 说明已经执行完成 */
       if (0 == es_id_s.size()) {
         break;
@@ -54,7 +60,7 @@ public class M_KinshipGetPayment {
       jgGet(es_id_s, jg_id_s);
       /** 打印本批次判罪条件的集合信息 */
       System.out.println("rids::::::" + jg_id_s);
-      jg_id_s.forEach((Long id) -> {
+      jg_id_s.parallelStream().forEach((Long id) -> {
         // 关系信息
         List<Map<String, Object>> relations = new ArrayList<>();
         // 牵扯到的定点ID
@@ -114,6 +120,10 @@ public class M_KinshipGetPayment {
         }
         // 写入ES中
         addES((Long) a.id(), uid, name, vertices, relations, payment[0]);
+        size.addAndGet(1);
+        if(size.get() % 100 == 0){
+          System.out.println("size::::" + size);
+        }
       });
       es_id_s.clear();
       jg_id_s.clear();
@@ -140,7 +150,7 @@ public class M_KinshipGetPayment {
    */
   public static final void addES(Long id, String uid, String name, List<Long> nodes, List<Map<String, Object>> links, Double money) {
     TransportClient client = ESConnection.getClient();
-    IndexRequestBuilder requestBuilder = client.prepareIndex("janusgraph_all_kinshipgetpyment", "all_kinshipgetpyment", LongEncoding.encode(id));
+    IndexRequestBuilder requestBuilder = client.prepareIndex("janusgraph_all_kinshipgetpyment", "a", LongEncoding.encode(id));
     Map<String, Object> source = new HashMap<>();
     source.put("id", id);
     source.put("uid", uid);
@@ -148,6 +158,7 @@ public class M_KinshipGetPayment {
     source.put("nodes", nodes);
     source.put("links", links);
     source.put("money", money);
+    source.put("updatetime", System.currentTimeMillis());
     source.put("type", "KinshipGetPayment");
     requestBuilder.setSource(source);
     requestBuilder.execute().actionGet();
@@ -162,10 +173,8 @@ public class M_KinshipGetPayment {
    * @param ids
    */
   public static final void esGet(ArrayList<Long> ids, Integer page) {
-    Integer size = 500000;
-
+    final int size = 1000000;
     TransportClient client = ESConnection.getClient();
-
     SearchRequestBuilder prepareSearch = client.prepareSearch().setIndices("janusgraph_all_vertex").setTypes("all_vertex");
     prepareSearch.setFrom(page * size).setSize(size).addSort("updatetime", SortOrder.DESC);
     BoolQueryBuilder boolQuery = QueryBuilders.boolQuery().must(QueryBuilders.matchPhraseQuery("type", "Department"));
@@ -176,7 +185,6 @@ public class M_KinshipGetPayment {
     searchHits.forEach((SearchHit hits) -> {
       ids.add(LongEncoding.decode(hits.getId()));
     });
-
     ids.sort((Long s, Long e) -> {
       if (s > e) {
         return 1;
@@ -189,6 +197,7 @@ public class M_KinshipGetPayment {
   }
 
   public static final void jgGet(ArrayList<Long> ids, ArrayList<Long> rids) {
+    AtomicInteger size = new AtomicInteger(0);
     GraphTraversalSource g = GraphFactory.getInstance().builderConfig().getG();
     ids.parallelStream().forEach((Long id) -> {
       GraphTraversal<Vertex, Vertex> result = g.V(id).has("type", "Department").aggregate("a").inE().has("type", "SERVE").as("x").outV().has("type", "Person").as("b").bothE().has("type", "KINSHIP")
@@ -197,6 +206,10 @@ public class M_KinshipGetPayment {
       if (result.hasNext()) {
         System.out.println(":::::::::::::::::::" + result.next().id());
         rids.add((Long) result.next().id());
+      }
+      size.addAndGet(1);
+      if(size.get() % 100 == 0){
+        System.out.println("size::::" + size);
       }
     });
   }
@@ -215,16 +228,22 @@ public class M_KinshipGetPayment {
       String type = (String) getSourceAsMap.get("type");
       if (status) {
         if ("PAYMENT".equals(type)) {
-          Object value = getSourceAsMap.getOrDefault("value", "0");
+          Object value = getSourceAsMap.getOrDefault("money", "0");
           if (null != value) {
-            if (value instanceof String) {
-              payment[0] = payment[0] + Double.valueOf((String) value);
-            } else if (value instanceof Long) {
+            if (value instanceof Long) {
               payment[0] = payment[0] + Double.valueOf((Long) value);
             } else if (value instanceof Integer) {
               payment[0] = payment[0] + Double.valueOf((Integer) value);
+            } else if (value instanceof Short) {
+              payment[0] = payment[0] + Double.valueOf((Short) value);
+            } else if (value instanceof Double) {
+              payment[0] = payment[0] + ((Double) value);
+            } else if (value instanceof Float) {
+              payment[0] = payment[0] + ((Float) value);
+            } else if (value instanceof String) {
+              payment[0] = payment[0] + Double.valueOf((String) value);
             } else {
-
+              ;
             }
           }
         }
