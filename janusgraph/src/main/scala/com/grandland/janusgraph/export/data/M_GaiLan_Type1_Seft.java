@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.tinkerpop.gremlin.process.traversal.P;
@@ -17,18 +18,10 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.elasticsearch.action.index.IndexRequestBuilder;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.sort.SortOrder;
 import org.janusgraph.graphdb.relations.CacheEdge;
 import org.janusgraph.graphdb.vertices.CacheVertex;
 
-import com.google.bigtable.repackaged.com.google.gson.Gson;
 import com.grandland.janusgraph.core.ESConnection;
 import com.grandland.janusgraph.core.GraphFactory;
 import com.grandland.janusgraph.core.LongEncoding;
@@ -44,24 +37,33 @@ import com.grandland.janusgraph.core.LongEncoding;
  * @version 2018-01-17<br/>
  *
  */
-public class M_GaiLan_Type1 {
+public class M_GaiLan_Type1_Seft {
   public static AtomicInteger size = new AtomicInteger(0);
 
   public static void main(String[] args) {
+    Scanner scan = new Scanner(System.in);
     GraphTraversalSource g = GraphFactory.getInstance().builderConfig().getG();
-    for (Integer page = 0;; page++) {
-      /** 保存ES中获取的Company的ID信息 */
+    for (;;) {
       List<Long> ids = new ArrayList<Long>();
-      /** 从ES中获取的Company的ID信息,放入{es_id_s}中 */
-      esGet(ids, page);
-//       ids.add(605696072L);
-      /** 如果从ES里面获取的Department的ID信息为0, 说明已经执行完成 */
-      if (0 == ids.size()) {
+      int _sum = 15;
+      ids.clear();
+      System.out.print("请输入ID:");
+      String line = scan.nextLine();
+      if (line.trim().equals("q")) {
         break;
       } else {
-        System.out.println("第" + page + "页!");
-        System.out.println("ids::::::" + ids.size());
+        try {
+          ids.add(Long.valueOf(line.split(" ")[0]));
+        } catch (Exception e) {
+          System.out.println("ERROR");
+        }
+        try {
+          _sum = Integer.valueOf(line.split(" ")[1]);
+        } catch (Exception e) {
+          _sum = 15;
+        }
       }
+      final int sum = _sum;
       // match p=(a:Company)-[r:INVEST_H|:INVEST_O]-(b) where a.state <> '注销企业'
       // return a as startnode ,nodes(p) as nodes,rels(p) as links,length(p) as
       // length limit 200
@@ -171,7 +173,7 @@ public class M_GaiLan_Type1 {
             } else {
               return 0;
             }
-          }).limit(20 + new Random().nextInt(5)).forEach((CacheEdge e) -> {
+          }).limit(sum).forEach((CacheEdge e) -> {
             // 获取关系中用的点
             long fvid = e.id().getOutVertexId();
             long tvid = e.id().getInVertexId();
@@ -191,7 +193,7 @@ public class M_GaiLan_Type1 {
             } else {
               return 0;
             }
-          }).limit(20 + new Random().nextInt(5)).forEach((CacheEdge e) -> {
+          }).limit(sum).forEach((CacheEdge e) -> {
             // 获取关系中用的点
             long fvid = e.id().getOutVertexId();
             long tvid = e.id().getInVertexId();
@@ -341,51 +343,6 @@ public class M_GaiLan_Type1 {
     source.put("type", "GaiLanTypeIsOneForC");
     requestBuilder.setSource(source);
     requestBuilder.execute().actionGet();
-    // System.out.println("-----------------------------------------------");
-    // System.out.println(new Gson().toJson(source));
-    // System.out.println("-----------------------------------------------");
-    System.out.print(".");
+    System.out.println(".");
   }
-
-  /**
-   * 获取所有Department的ID
-   * 
-   * @param ids
-   */
-  public static final void esGet(List<Long> ids, Integer page) {
-    System.out.println("开始拉取ES数据");
-    final Integer size = 1000000;
-    TransportClient client = ESConnection.getClient();
-    SearchRequestBuilder prepareSearch = client.prepareSearch().setIndices("janusgraph_all_gailantype1c").setTypes("a");
-    prepareSearch.setFrom(page * size).setSize(size).addSort("money", SortOrder.DESC);
-    prepareSearch.storedFields();
-    SearchResponse searchResponse = prepareSearch.get();
-    SearchHits searchHits = searchResponse.getHits();
-    searchHits.forEach((SearchHit hits) -> {
-      ids.add(LongEncoding.decode(hits.getId()));
-    });
-    System.out.println("结束拉取ES数据");
-    //
-    // System.out.println("开始拉取ES数据");
-    // final Integer size = 1000000;
-    // TransportClient client = ESConnection.getClient();
-    // SearchRequestBuilder prepareSearch =
-    // client.prepareSearch().setIndices("janusgraph_all_vertex").setTypes("all_vertex");
-    // prepareSearch.setFrom(page * size).setSize(size);
-    // BoolQueryBuilder boolQuery =
-    // QueryBuilders.boolQuery().must(QueryBuilders.matchPhraseQuery("type",
-    // "Company"));
-    // boolQuery.mustNot(QueryBuilders.matchPhraseQuery("state__STRING",
-    // "注销企业"));
-    // prepareSearch.setQuery(boolQuery);
-    // prepareSearch.addSort("updatetime", SortOrder.DESC);
-    // prepareSearch.storedFields();
-    // SearchResponse searchResponse = prepareSearch.get();
-    // SearchHits searchHits = searchResponse.getHits();
-    // searchHits.forEach((SearchHit hits) -> {
-    // ids.add(LongEncoding.decode(hits.getId()));
-    // });
-    // System.out.println("结束拉取ES数据");
-  }
-
 }

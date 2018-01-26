@@ -182,6 +182,13 @@ public class M_GaiLan {
     System.out.println(new Gson().toJson(source));
     System.out.println("-----------------------------------------------");
   }
+  
+  public void add(String index, String type, @SuppressWarnings("unchecked") Map<String, Object>... hits) {
+    TransportClient client = ESConnection.getClient();
+    IndexRequestBuilder requestBuilder = client.prepareIndex(index, type);
+    requestBuilder.setSource(hits);
+    requestBuilder.execute().actionGet();
+  }
 
   /**
    * 获取所有Company的ID

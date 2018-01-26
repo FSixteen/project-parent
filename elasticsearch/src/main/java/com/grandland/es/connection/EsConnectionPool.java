@@ -1,8 +1,10 @@
-package com.xyshzh.connection;
+package com.grandland.es.connection;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 import org.elasticsearch.client.transport.TransportClient;
@@ -11,7 +13,7 @@ import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
-import com.xyshzh.utils.Utils;
+import com.grandland.utils.Utils;
 
 /**
  * ElasticSearch Transport Client Util.
@@ -20,29 +22,29 @@ import com.xyshzh.utils.Utils;
  * @version 2018-01-08<br/>
  *
  */
-public class EsConnection {
+public class EsConnectionPool {
 
-  private static String ips = "127.0.0.1";
-  private static Integer port = 9300;
-  private static Builder builder = Settings.builder();
-  private static Settings settings = null;
-  private static Integer client_min_size = 5; // Client集合最小数量
-  private static Integer client_max_size = client_min_size * 4; // Client集合最大数量
-  private static Integer client_init_batch_size = client_min_size; // 批次大小,本次初始化Client数量
-  private static Vector<TransportClient> clients = new Vector<TransportClient>();
+  private Map<String, ?> config = null;
+  private Builder builder = Settings.builder();
+  private Settings settings = null;
+  private Integer client_min_size = 5; // Client集合最小数量
+  private Integer client_max_size = client_min_size * 4; // Client集合最大数量
+  private Integer client_init_batch_size = client_min_size; // 批次大小,本次初始化Client数量
+  private Vector<TransportClient> clients = new Vector<TransportClient>();
 
-  static {
-    init();
+  public EsConnectionPool(Map<String, ?> config) {
+    if (null == config || config.isEmpty())
+      throw new RuntimeException(this.getClass().getName() + " [config] is null or empty");
+    this.config = config;
+    for (final Entry<String, ?> entry : this.config.entrySet()) {
+      String key = entry.getKey();
+      Object value = entry.getValue();
+
+    }
   }
 
-  public static void init() {
-    try {
-      builder.put("cluster.name", "es-app");
-      builder.put("client.transport.sniff", true);
-      settings = builder.build();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+  public static void main(String[] args) {
+    new EsConnectionPool(null);
   }
 
   /**
@@ -50,7 +52,7 @@ public class EsConnection {
    * 
    * @return TransportClient客户端.
    */
-  public static TransportClient getClient() {
+  public TransportClient getClient() {
     if (0 < clients.size()) {
       new Thread(new Runnable() {
         @Override
@@ -77,7 +79,7 @@ public class EsConnection {
    * @param client
    *          TransportClient客户端.
    */
-  public static void releaseClient(TransportClient client) {
+  public void releaseClient(TransportClient client) {
     if (null == client) {
       return;
     } else if (client_max_size < clients.size()) {
@@ -93,7 +95,7 @@ public class EsConnection {
    * @return TransportClient集合
    */
   @SuppressWarnings("resource")
-  private static synchronized void getClients() {
+  private synchronized void getClients() {
     synchronized (String.class) {
       if (client_min_size > clients.size()) {
         for (int i = client_init_batch_size; i > 0; i--) {
@@ -109,13 +111,13 @@ public class EsConnection {
    *
    * @return TransportAddress集合
    */
-  private static synchronized List<TransportAddress> getAllAddress() {
+  private synchronized List<TransportAddress> getAllAddress() {
     List<TransportAddress> addressList = new ArrayList<TransportAddress>();
-    for (String ip : ips.split(",")) {
+    for (String ip : "".split(",")) {
       if (!Utils.isStandardOfIPV4(ip)) {
         continue;
       } else {
-        addressList.add(new TransportAddress(new InetSocketAddress(ip, port)));
+        addressList.add(new TransportAddress(new InetSocketAddress(ip, 9300)));
       }
     }
     return addressList;
