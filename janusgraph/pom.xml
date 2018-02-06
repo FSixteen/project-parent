@@ -98,7 +98,7 @@
 			<groupId>com.xyshzh</groupId>
 			<artifactId>gremlin</artifactId>
 			<version>0.0.1</version>
-			<exclusions>
+			<exclusions> 
 				<exclusion>
 					<groupId>io.netty</groupId>
 					<artifactId>netty-all</artifactId>

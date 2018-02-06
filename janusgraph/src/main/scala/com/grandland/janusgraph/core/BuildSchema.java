@@ -1,7 +1,6 @@
 package com.grandland.janusgraph.core;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 
 import org.janusgraph.core.Multiplicity;
 import org.janusgraph.core.PropertyKey;
@@ -101,7 +100,7 @@ public final class BuildSchema {
       }
     }
     // */
-
+    // /*
     System.out.println("---开始处理完整的IndexEnum注解---");
     JanusGraphManagement.IndexBuilder all_vertex = null;
     JanusGraphManagement.IndexBuilder all_edge = null;
@@ -151,6 +150,7 @@ public final class BuildSchema {
         all_vertex.buildMixedIndex(mixedIndexName);
       }
     }
+    // */
     System.out.println("---处理完整的IndexEnum注解完成---");
     mgmt.commit();
     System.out.println("\n\n\\^o^/字段创建完成\\^o^/\n\n");

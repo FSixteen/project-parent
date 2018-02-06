@@ -22,13 +22,13 @@ connectionPool:
     maxContentLength: 655360
 
 # The maximum number of in-flight requests that can occur on a connection.
-    maxInProcessPerConnection: 4
+    maxInProcessPerConnection: 8
 
 # The maximum number of times that a connection can be borrowed from the pool simultaneously.
-    maxSimultaneousUsagePerConnection: 16
+    maxSimultaneousUsagePerConnection: 32
 
 # The maximum size of a connection pool for a host.
-    maxSize: 8
+    maxSize: 32
 
 # The amount of time in milliseconds to wait for a new connection before timing out.
     maxWaitForConnection: 3000
@@ -64,7 +64,7 @@ hosts:
 jaasEntry: none
 
 # Size of the pool for handling request/response operations. available processors
-nioPoolSize: 4
+nioPoolSize: 8
 
 # The password to submit on requests that require authentication.
 password: none
@@ -81,10 +81,10 @@ serializer:
     className: org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV1d0
 
 # A Map of configuration settings for the serializer.
-    config: { ioRegistries: [org.janusgraph.graphdb.tinkerpop.JanusGraphIoRegistry] , serializeResultToString: true}
+    config: { ioRegistries: [org.janusgraph.graphdb.tinkerpop.JanusGraphIoRegistry] , serializeResultToString: false}
 
 # The username to submit on requests that require authentication.
 username: none
 
 # Size of the pool for handling background work.  available processors * 2
-workerPoolSize: 8
+workerPoolSize: 16

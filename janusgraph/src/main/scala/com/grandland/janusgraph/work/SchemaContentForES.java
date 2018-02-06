@@ -206,6 +206,11 @@ public class SchemaContentForES {
   @IndexEnum(name = "tvid", index = { Index.Edge }, mapping = Mapping.NULL, indexList = {
       "tvid" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
   private Long tvid;
+  
+  @PropertyKeyEnum
+  @IndexEnum(name = "pageRank", index = { Index.Vertex }, mapping = Mapping.NULL, indexList = {
+      "pageRank" }, compositeIndex = false, consistencyModifier = ConsistencyModifier.DEFAULT, unique = false, mixedIndex = true, mixedIndexName = "search")
+  private Double pageRank;
 
   // ----------------------------------------
 

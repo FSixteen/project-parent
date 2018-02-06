@@ -3,7 +3,6 @@ package com.grandland.janusgraph.export.data;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang.StringUtils;
@@ -27,30 +26,25 @@ import com.xyshzh.gremlin.client.Connection;
  * @version 2018-01-17<br/>
  *
  */
-public class ES_D {
+public class ES_D2 {
   private static final Connection conn = new Connection.ClientConnection("./gremlin-driver.properties", false);
   private static final Client client = conn.getClient();
-
-  // 2646982656 292712568
-  /**
-   * @param args
-   */
   @SuppressWarnings("unused")
-
   public static void main(String[] args) {
-    final long haha = Long.valueOf(args[1]);
-    for (long page = Long.valueOf(args[0]); page < 100000; page++) {
+    for (long page = 0; page < 3000; page++) {
       AtomicInteger size = new AtomicInteger(0);
-      System.out.println("正在执行::" + (page) + "::" + (page * haha) + "~" + (page * haha + haha));
-      // List<Map<String, Object>> list = esGet(188568L, 188568L);
-      List<Map<String, Object>> list = esGet((page * haha), (page * haha + haha));
+      long haha = 25000L;
+      long start = haha - (page + 1) * 5000L;
+      long end = haha - page * 5000L;
+       System.out.println(start + ":~~:" + end);
+      List<Map<String, Object>> list = esGet(start, end);
       List<String> result = new ArrayList<>();
-      System.out.println("数据大小::" + list.size());
+       System.out.println("数据大小::" + list.size());
       for (int i = 0; i < list.size(); i++) {
-        size.addAndGet(1);
-        if (size.get() % 100 == 0) {
-          System.out.println("size::::" + size);
-        }
+        // size.addAndGet(1);
+        // if (size.get() % 100 == 0) {
+        // System.out.println("size::::" + size);
+        // }
         Map<String, Object> _1 = list.get(i);
         for (int j = i + 1; j < list.size(); j++) {
           Map<String, Object> _2 = list.get(j);
@@ -91,66 +85,42 @@ public class ES_D {
           }
         }
       }
-
-      System.out.println("重复数据大小::" + result.size());
-      if (0 < result.size() && result.size() < 150) {
-        String query = "g.E(" + StringUtils.join(result, ',') + ").drop()";
-        try {
-          client.submit(query).all().get();
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        } catch (ExecutionException e) {
-          e.printStackTrace();
-        }
-        System.out.println(query);
-        result.clear();
-        try {
-          Thread.sleep(1000);
-        } catch (Exception e) {
-        }
-      } else {
-        List<String> temp = new ArrayList<String>(105);
-        for (String _1 : result) {
-          temp.add(_1);
-          if (temp.size() > 100) {
-            String query = "g.E(" + StringUtils.join(temp, ',') + ").drop()";
-            try {
-              client.submit(query).all().get();
-            } catch (InterruptedException e) {
-              e.printStackTrace();
-            } catch (ExecutionException e) {
-              e.printStackTrace();
-            }
-            System.out.println(query);
-            temp.clear();
-          }
-        }
-        if (temp.size() > 0) {
+       System.out.println("重复数据大小::" + result.size());
+      List<String> temp = new ArrayList<String>(105);
+      for (String _1 : result) {
+        temp.add(_1);
+        if (temp.size() > 200) {
           String query = "g.E(" + StringUtils.join(temp, ',') + ").drop()";
           try {
             client.submit(query).all().get();
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-          } catch (ExecutionException e) {
+          } catch (Exception e) {
             e.printStackTrace();
           }
           System.out.println(query);
           temp.clear();
-          try {
-            Thread.sleep(1000);
-          } catch (Exception e) {
-          }
         }
       }
-      System.out.println("page::::::" + page);
+      if (temp.size() > 0) {
+        String query = "g.E(" + StringUtils.join(temp, ',') + ").drop()";
+        try {
+          client.submit(query).all().get();
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+        System.out.println(query);
+        temp.clear();
+      }
+      if (result.size() > 0) {
+         break;
+      }
     }
   }
 
   public static final List<Map<String, Object>> esGet(Long from, Long to) {
-    System.out.println("开始拉取ES数据");
+    // System.out.println("开始拉取ES数据");
     TransportClient client = ESConnection.getClient();
     SearchRequestBuilder prepareSearch = client.prepareSearch().setIndices("janusgraph_all_edge").setTypes("all_edge");
-    prepareSearch.setFrom(0).setSize(30000);
+    prepareSearch.setFrom(0).setSize(300000);
     BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
     boolQuery.must(QueryBuilders.rangeQuery("fvid").gte(from).lte(to));
     boolQuery.mustNot(QueryBuilders.termQuery("fvid", 1305428120L));
@@ -170,7 +140,7 @@ public class ES_D {
       map.put("_id", hits.getId());
       list.add(map);
     });
-    System.out.println("结束拉取ES数据");
+    // System.out.println("结束拉取ES数据");
     return list;
   }
 
