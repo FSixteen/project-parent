@@ -47,7 +47,7 @@ public class Execute {
     else
       prepareSearch.setSize(size);
     if (null != fields && 0 < fields.length)
-      prepareSearch.storedFields(fields);
+      prepareSearch.setFetchSource(fields, new String[] {});
     if (null != queryBuilder)
       prepareSearch.setQuery(queryBuilder);
     if (null != postFilter)

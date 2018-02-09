@@ -38,7 +38,7 @@ public class Execute {
   }
 
   public List<Result> getResults(String query, Map<String, Object> args) {
-    log.info(this.getClass().getPackage().getName() + " :: getResults :: Query :: " + query);
+    log.info("getResults::Query::" + query + "::args.size=" + ((null == args) ? 0 : args.size()));
     List<Result> results = new ArrayList<>();
     Long start = System.currentTimeMillis();
     try {
@@ -52,7 +52,8 @@ public class Execute {
     } catch (InterruptedException | ExecutionException e) {
       e.printStackTrace();
     }
-    log.info(this.getClass().getPackage().getName() + " :: getResults :: Time :: " + ((start - System.currentTimeMillis()) + " ms ."));
+    log.info(this.getClass().getPackage().getName() + " :: getResults :: Time :: "
+        + ((start - System.currentTimeMillis()) + " ms ."));
     return results;
   }
 
@@ -171,7 +172,7 @@ public class Execute {
     return (null != result) ? clazz.cast(result.getObject()) : null;
   }
 
-  public Map<?, ?> getMap(String query, Map<String, Object> args) {
+  public <K, V> Map<K, V> getMap(String query, Map<String, Object> args) {
     Result result = getResult(query, args);
     return (null != result) ? result.get(Map.class) : null;
   }
@@ -250,9 +251,9 @@ public class Execute {
     return objects;
   }
 
-  public Map<?, ?>[] getMaps(String query, Map<String, Object> args) {
+  public <K, V> Map<K, V>[] getMaps(String query, Map<String, Object> args) {
     List<Result> results = getResults(query, args);
-    Map<?, ?>[] maps = new LinkedHashMap<?, ?>[results.size()];
+    Map<K, V>[] maps = new LinkedHashMap[results.size()];
     for (int i = results.size() - 1; i >= 0; i--) {
       maps[i] = results.get(i).get(Map.class);
     }

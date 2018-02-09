@@ -1,16 +1,13 @@
-<?xml version="1.0"?>
-<project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.xyshzh</groupId>
-	<artifactId>elasticsearch</artifactId>
+	<groupId>com.grandland</groupId>
+	<artifactId>es-gremlin</artifactId>
 	<version>0.0.1</version>
 	<packaging>jar</packaging>
 
-	<name>elasticsearch</name>
-	<url>http://www.xyshzh.com</url>
+	<name>es-gremlin</name>
 
 	<properties>
 		<encoding>UTF-8</encoding>
@@ -18,52 +15,31 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<junit.version>4.12</junit.version>
-		<org.elasticsearch.version>6.0.0</org.elasticsearch.version>
-		<com.xyshzh.utils.version>0.0.1</com.xyshzh.utils.version>
 	</properties>
 
 	<dependencies>
-		<!-- junit依赖组件信息 ↓ -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- junit依赖组件信息↑ -->
-
 		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.8.2</version>
-		</dependency>
-
-		<!-- Elasticsearch依赖组件信息 ↓ -->
-		<dependency>
-			<groupId>org.elasticsearch</groupId>
-			<artifactId>elasticsearch</artifactId>
-			<version>${org.elasticsearch.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.elasticsearch.client</groupId>
-			<artifactId>transport</artifactId>
-			<version>${org.elasticsearch.version}</version>
+			<groupId>com.xyshzh</groupId>
+			<artifactId>gremlin</artifactId>
+			<version>0.0.1</version>
 			<exclusions>
 				<exclusion>
-					<groupId>org.elasticsearch</groupId>
-					<artifactId>elasticsearch</artifactId>
+					<groupId>org.javassist</groupId>
+					<artifactId>javassist</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- Elasticsearch依赖组件信息↑ -->
-
-		<!-- com.xyshzh.utils依赖组件信息 ↓ -->
 		<dependency>
 			<groupId>com.xyshzh</groupId>
-			<artifactId>utils</artifactId>
-			<version>${com.xyshzh.utils.version}</version>
+			<artifactId>elasticsearch</artifactId>
+			<version>0.0.1</version>
 		</dependency>
-		<!-- com.xyshzh.utils依赖组件信息↑ -->
 	</dependencies>
 
 	<build>
