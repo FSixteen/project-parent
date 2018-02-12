@@ -31,19 +31,24 @@ public class Execute {
     return hit;
   }
 
-  public Long filter(List<Map<String, Object>> list, String index, String type, int from, int size, QueryBuilder queryBuilder, QueryBuilder postFilter, SortBuilder<?> sortBuilder) {
+  public Long filter(List<Map<String, Object>> list, String index, String type, int from, int size,
+      QueryBuilder queryBuilder, QueryBuilder postFilter, SortBuilder<?> sortBuilder) {
     return filter(list, index, type, from, size, null, queryBuilder, postFilter, sortBuilder);
   }
 
-  public Long filter(List<Map<String, Object>> list, String index, String type, int from, int size, String[] fields, QueryBuilder queryBuilder, QueryBuilder postFilter, SortBuilder<?> sortBuilder) {
+  public Long filter(List<Map<String, Object>> list, String index, String type, int from, int size,
+      String[] fields, QueryBuilder queryBuilder, QueryBuilder postFilter,
+      SortBuilder<?> sortBuilder) {
     TransportClient client = connection.getClient();
     SearchRequestBuilder prepareSearch = client.prepareSearch().setIndices(index).setTypes(type);
     if (from < 0)
-      throw new IllegalArgumentException("[from] parameter cannot be negative, found [" + from + "]");
+      throw new IllegalArgumentException(
+          "[from] parameter cannot be negative, found [" + from + "]");
     else
       prepareSearch.setFrom(from);
     if (size < 0)
-      throw new IllegalArgumentException("[size] parameter cannot be negative, found [" + size + "]");
+      throw new IllegalArgumentException(
+          "[size] parameter cannot be negative, found [" + size + "]");
     else
       prepareSearch.setSize(size);
     if (null != fields && 0 < fields.length)
@@ -55,7 +60,11 @@ public class Execute {
     if (null != sortBuilder)
       prepareSearch.addSort(sortBuilder);
     SearchHits searchHits = prepareSearch.get().getHits();
-    searchHits.forEach(hits -> list.add(hits.getSourceAsMap()));
+    searchHits.forEach(hits -> {
+      Map<String, Object> hit = hits.getSourceAsMap();
+      hit.put("_id", hits.getId());
+      list.add(hit);
+    });
     connection.releaseClient(client);
     return searchHits.getTotalHits();
   }
@@ -68,15 +77,19 @@ public class Execute {
   }
 
   @SuppressWarnings("unchecked")
-  public void add(String index, String type, String id, Map<String, Object> hit, Object... idHitPeers) {
+  public void add(String index, String type, String id, Map<String, Object> hit,
+      Object... idHitPeers) {
     if ((idHitPeers.length % 2) != 0) {
-      throw new IllegalArgumentException("array idHitPeers of id + hit order doesn't hold correct number of arguments (" + idHitPeers.length + ")");
+      throw new IllegalArgumentException(
+          "array idHitPeers of id + hit order doesn't hold correct number of arguments ("
+              + idHitPeers.length + ")");
     }
     TransportClient client = connection.getClient();
     BulkRequestBuilder bulkRequest = client.prepareBulk();
     bulkRequest.add(client.prepareIndex(index, type, id).setSource(hit));
     for (int i = 0; i < idHitPeers.length - 1; i++) {
-      bulkRequest.add(client.prepareIndex(index, type, String.class.cast(idHitPeers[i++])).setSource(Map.class.cast(idHitPeers[i])));
+      bulkRequest.add(client.prepareIndex(index, type, String.class.cast(idHitPeers[i++]))
+          .setSource(Map.class.cast(idHitPeers[i])));
     }
     bulkRequest.execute().actionGet();
     connection.releaseClient(client);

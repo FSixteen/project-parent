@@ -23,7 +23,7 @@ package com.xyshzh.dht.bencode;
  * @version 2018-01-21<br/>
  *
  */
-public interface BEncode{
+public interface BEncode {
 
   /**
    * 获取数据长度.
@@ -66,4 +66,13 @@ public interface BEncode{
    * @return
    */
   byte[] totalDate(String charsetName);
+
+  /**
+   * 生成对象.
+   * 
+   * @param content
+   * @param index
+   * @return
+   */
+  BEncode element(String content, int index);
 }

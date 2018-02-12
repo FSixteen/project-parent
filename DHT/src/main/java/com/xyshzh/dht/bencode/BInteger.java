@@ -98,4 +98,19 @@ public class BInteger implements BEncode, Comparable<BInteger> {
   public int compareTo(BInteger o) {
     return this.value.compareTo(o.value);
   }
+
+  /**
+   * DHT的报文必须是B编码格式.<br/>
+   * int类型:<br/>
+   * int类型的编码格式为i[int]e.以i开头,加上数字,以e结尾.<br/>
+   * eg:'123' => 'i123e'<br/>
+   */
+  @Override
+  public BEncode element(String content, int index) {
+    if (content.charAt(index) == 'i') {
+      String temp = content.substring(index + 1);
+      return new BInteger(temp.substring(0, temp.indexOf("e")));
+    }
+    return null;
+  }
 }

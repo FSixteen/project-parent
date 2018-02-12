@@ -96,4 +96,22 @@ public class BString implements BEncode, Comparable<BString> {
     return this.value.compareTo(o.value);
   }
 
+  /**
+   * DHT的报文必须是B编码格式.<br/>
+   * string类型:<br/>
+   * string类型的编码格式为[length]:[string].以字符串的长度开头,加一个冒号,并以字符串内容结束.<br/>
+   * eg:'abc' => '3:abc'<br/>
+   */
+  @Override
+  public BEncode element(String content, int index) {
+    char c = content.charAt(index);
+    if (c >= '0' && c <= '9') {
+      String str = content.substring(index);
+      int length = Integer.parseInt(str.substring(0, str.indexOf(":")));
+      str = str.substring(str.indexOf(":") + 1);
+      return new BString(str.substring(0, length + 1));
+    }
+    return null;
+  }
+
 }

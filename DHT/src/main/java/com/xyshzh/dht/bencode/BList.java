@@ -2,6 +2,7 @@ package com.xyshzh.dht.bencode;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 
 /**
@@ -16,6 +17,37 @@ import java.util.HashSet;
  */
 public class BList extends HashSet<BEncode> implements BEncode {
   private static final long serialVersionUID = -1516513658151651365L;
+
+  public BList() {
+  }
+
+  public BList(int... e) {
+    for (int el : e) {
+      this.add(new BInteger(el));
+    }
+  }
+
+  public BList(String... e) {
+    for (String el : e) {
+      this.add(new BString(el));
+    }
+  }
+
+  public BList(BEncode... e) {
+    this.addAll(Arrays.asList(e));
+  }
+
+  public boolean add(int e) {
+    return super.add(new BInteger(e));
+  }
+
+  public boolean add(String e) {
+    return super.add(new BString(e));
+  }
+
+  public boolean add(BEncode e) {
+    return super.add(e);
+  }
 
   @Override
   public int length() {
